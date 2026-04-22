@@ -1,0 +1,11 @@
+{
+  "collectionName": "components_event_schedule_items",
+  "info": {
+    "displayName": "Schedule Item"
+  },
+  "attributes": {
+    "time": { "type": "string" },
+    "title": { "type": "string" },
+    "description": { "type": "string" }
+  }
+}

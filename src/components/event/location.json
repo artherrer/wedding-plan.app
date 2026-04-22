@@ -1,0 +1,13 @@
+{
+  "collectionName": "components_event_locations",
+  "info": {
+    "displayName": "Location"
+  },
+  "attributes": {
+    "title": { "type": "string" }, 
+    "name": { "type": "string" },
+    "time": { "type": "string" },
+    "map_url": { "type": "string" },
+    "city": { "type": "string" }
+  }
+}

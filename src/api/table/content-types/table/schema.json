@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tables",
+  "info": {
+    "singularName": "table",
+    "pluralName": "tables",
+    "displayName": "Table"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "number": {
+      "type": "integer",
+      "required": true
+    },
+    "capacity": {
+      "type": "integer",
+      "default": 10,
+      "min": 1
+    },
+    "event": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::event.event",
+      "inversedBy": "tables",
+      "required": true
+    },
+    "captain_guest": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::guest.guest"
+    },
+    "captain_companion": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::companion.companion"
+    }
+  }
+}

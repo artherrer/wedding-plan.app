@@ -1,0 +1,109 @@
+{
+  "kind": "collectionType",
+  "collectionName": "events",
+  "info": {
+    "singularName": "event",
+    "pluralName": "events",
+    "displayName": "Event"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name"
+    },
+    "main_title": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "event_date": {
+      "type": "datetime",
+      "required": true
+    },
+    "confirmation_deadline": {
+      "type": "date"
+    },
+    "background_image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "gallery_image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "music": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "audios"
+      ]
+    },
+    "message": {
+      "type": "richtext"
+    },
+    "dress_code": {
+      "type": "string"
+    },
+    "dress_code_note": {
+      "type": "text"
+    },
+    "color_palette": {
+      "type": "json"
+    },
+    "gift_message": {
+      "type": "richtext"
+    },
+    "bank_account": {
+      "type": "string"
+    },
+    "clabe": {
+      "type": "string"
+    },
+    "gift_registry": {
+      "type": "component",
+      "repeatable": true,
+      "component": "event.gift-registry"
+    },
+    "schedule": {
+      "type": "component",
+      "repeatable": true,
+      "component": "event.schedule-item"
+    },
+    "locations": {
+      "type": "component",
+      "repeatable": true,
+      "component": "event.location"
+    },
+    "guests": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::guest.guest",
+      "mappedBy": "event"
+    },
+    "tables": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::table.table",
+      "mappedBy": "event"
+    },
+    "admins": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.user"
+    }
+  }
+}

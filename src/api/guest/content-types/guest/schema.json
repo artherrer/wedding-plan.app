@@ -1,0 +1,63 @@
+{
+  "kind": "collectionType",
+  "collectionName": "guests",
+  "info": {
+    "singularName": "guest",
+    "pluralName": "guests",
+    "displayName": "Guest"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "full_name": {
+      "type": "string",
+      "required": true
+    },
+    "unique_code": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "max_passes": {
+      "type": "integer",
+      "required": true,
+      "min": 1
+    },
+    "confirmed_passes": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "pending",
+        "yes",
+        "no"
+      ],
+      "default": "pending"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "event": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::event.event",
+      "inversedBy": "guests",
+      "required": true
+    },
+    "table": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::table.table"
+    },
+    "companions": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::companion.companion",
+      "mappedBy": "guest"
+    }
+  }
+}

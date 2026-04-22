@@ -1,0 +1,17 @@
+{
+    "collectionName": "components_event_gift_registries",
+    "info": {
+        "displayName": "Gift Registry"
+    },
+    "attributes": {
+        "name": {
+            "type": "string"
+        },
+        "url": {
+            "type": "string"
+        },
+        "reference_number": {
+            "type": "string"
+        }
+    }
+}
