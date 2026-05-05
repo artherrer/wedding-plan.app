@@ -7,86 +7,106 @@ import { factories } from "@strapi/strapi";
 export default factories.createCoreController(
   "api::companion.companion",
   ({ strapi }) => ({
+    // ─────────────────────────────────────────────
     async find(ctx) {
-      const eventId = ctx.state.event.id;
-
-      const originalFilters = ctx.request.query.filters || {};
-
-      ctx.request.query = {
-        ...ctx.request.query,
-        filters: {
-          originalFilters,
-          event: eventId,
-        },
-      };
-
+      // Middleware ya valida + fuerza filtro
       return await super.find(ctx);
     },
 
+    // ─────────────────────────────────────────────
     async findOne(ctx) {
-      const eventId = ctx.state.event.id;
+      const userEvents = ctx.state.events;
 
       const entity = await strapi
         .documents("api::companion.companion")
         .findOne({
-          populate: ["event"],
           documentId: ctx.params.id,
+          populate: ["event"],
         });
 
-      if (!entity || entity.event.id !== eventId) {
+      if (!entity) {
+        return ctx.notFound("Companion not found");
+      }
+
+      const hasAccess = userEvents.some(
+        (e) => e.documentId === entity.event?.documentId,
+      );
+
+      if (!hasAccess) {
         return ctx.forbidden("Access denied");
       }
 
       return entity;
     },
 
+    // ─────────────────────────────────────────────
     async create(ctx) {
-      const eventId = ctx.state.event.id;
-
-      ctx.request.body.data.event = eventId;
-
       return await super.create(ctx);
     },
 
+    // ─────────────────────────────────────────────
     async update(ctx) {
-      const eventId = ctx.state.event.id;
+      const userEvents = ctx.state.events;
 
       const entity = await strapi
         .documents("api::companion.companion")
         .findOne({
-          populate: ["event"],
           documentId: ctx.params.id,
+          populate: ["event", "guest"],
         });
 
-      if (!entity || entity.event.id !== eventId) {
+      if (!entity) {
+        return ctx.notFound("Companion not found");
+      }
+
+      const hasAccess = userEvents.some(
+        (e) => e.documentId === entity.event?.documentId,
+      );
+
+      if (!hasAccess) {
         return ctx.forbidden("Access denied");
       }
 
-      const guest = await strapi.documents("api::guest.guest").findOne({
-        populate: ["event"],
-        documentId: ctx.params.id,
-      });
+      // 🔥 Validar que el guest (si viene) pertenece al mismo evento
+      if (ctx.request.body.data?.guest) {
+        const guest = await strapi.documents("api::guest.guest").findOne({
+          documentId: ctx.request.body.data.guest,
+          populate: ["event"],
+        });
 
-      if (guest.event.id !== eventId) {
-        return ctx.forbidden("Invalid relation");
+        if (!guest || guest.event?.documentId !== entity.event?.documentId) {
+          return ctx.forbidden("Invalid guest relation");
+        }
       }
 
-      delete ctx.request.body.data?.event;
+      // 🔒 evitar cambiar de evento
+      if (ctx.request.body.data?.event) {
+        delete ctx.request.body.data.event;
+      }
 
       return await super.update(ctx);
     },
 
+    // ─────────────────────────────────────────────
     async delete(ctx) {
-      const eventId = ctx.state.event.id;
+      const userEvents = ctx.state.events;
 
       const entity = await strapi
         .documents("api::companion.companion")
         .findOne({
-          populate: ["event"],
           documentId: ctx.params.id,
+          populate: ["guest.event"],
         });
 
-      if (!entity || entity.event.id !== eventId) {
+      if (!entity) {
+        return ctx.notFound("Companion not found");
+      }
+
+      const hasAccess = userEvents.some(
+        (e) => e.documentId === entity.guest?.event?.documentId,
+      );
+
+      if (!hasAccess) {
         return ctx.forbidden("Access denied");
       }
 

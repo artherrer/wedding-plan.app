@@ -9,6 +9,7 @@
   "options": {
     "draftAndPublish": false
   },
+  "pluginOptions": {},
   "attributes": {
     "name": {
       "type": "string",
@@ -73,20 +74,27 @@
     "clabe": {
       "type": "string"
     },
+    "is_manageable": {
+      "type": "boolean",
+      "default": false
+    },
+    "whatsapp_message": {
+      "type": "richtext"
+    },
     "gift_registry": {
       "type": "component",
-      "repeatable": true,
-      "component": "event.gift-registry"
+      "component": "event.gift-registry",
+      "repeatable": true
     },
     "schedule": {
       "type": "component",
-      "repeatable": true,
-      "component": "event.schedule-item"
+      "component": "event.schedule-item",
+      "repeatable": true
     },
     "locations": {
       "type": "component",
-      "repeatable": true,
-      "component": "event.location"
+      "component": "event.location",
+      "repeatable": true
     },
     "guests": {
       "type": "relation",

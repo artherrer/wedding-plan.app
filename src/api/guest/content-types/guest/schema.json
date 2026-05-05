@@ -9,15 +9,14 @@
   "options": {
     "draftAndPublish": false
   },
+  "pluginOptions": {},
   "attributes": {
     "full_name": {
       "type": "string",
       "required": true
     },
     "unique_code": {
-      "type": "string",
-      "required": true,
-      "unique": true
+      "type": "string"
     },
     "max_passes": {
       "type": "integer",
@@ -31,12 +30,12 @@
     },
     "status": {
       "type": "enumeration",
+      "default": "pending",
       "enum": [
         "pending",
         "yes",
         "no"
-      ],
-      "default": "pending"
+      ]
     },
     "phone": {
       "type": "string"
@@ -45,8 +44,7 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::event.event",
-      "inversedBy": "guests",
-      "required": true
+      "inversedBy": "guests"
     },
     "table": {
       "type": "relation",
@@ -58,6 +56,9 @@
       "relation": "oneToMany",
       "target": "api::companion.companion",
       "mappedBy": "guest"
+    },
+    "note": {
+      "type": "text"
     }
   }
 }

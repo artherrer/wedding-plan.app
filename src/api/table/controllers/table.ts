@@ -7,75 +7,92 @@ import { factories } from "@strapi/strapi";
 export default factories.createCoreController(
   "api::table.table",
   ({ strapi }) => ({
+    // ─────────────────────────────────────────────
     async find(ctx) {
-      const eventId = ctx.state.event.id;
-
-      const originalFilters = ctx.request.query.filters || {};
-
-      ctx.request.query = {
-        ...ctx.request.query,
-        filters: {
-          originalFilters,
-          event: eventId,
-        },
-      };
-
+      // El middleware ya filtra por event
       return await super.find(ctx);
     },
 
+    // ─────────────────────────────────────────────
     async findOne(ctx) {
-      const eventId = ctx.state.event.id;
+      const userEvents = ctx.state.events;
 
       const entity = await strapi.documents("api::table.table").findOne({
-        populate: ["event"],
         documentId: ctx.params.id,
+        populate: ["event"],
       });
 
-      if (!entity || entity.event.id !== eventId) {
+      if (!entity) {
+        return ctx.notFound("Table not found");
+      }
+
+      const hasAccess = userEvents.some(
+        (e) => e.documentId === entity.event?.documentId
+      );
+
+      if (!hasAccess) {
         return ctx.forbidden("Access denied");
       }
 
       return entity;
     },
 
+    // ─────────────────────────────────────────────
     async create(ctx) {
-      const eventId = ctx.state.event.id;
-
-      ctx.request.body.data.event = eventId;
-
       return await super.create(ctx);
     },
 
+    // ─────────────────────────────────────────────
     async update(ctx) {
-      const eventId = ctx.state.event.id;
+      const userEvents = ctx.state.events;
 
       const entity = await strapi.documents("api::table.table").findOne({
-        populate: ["event"],
         documentId: ctx.params.id,
+        populate: ["event"],
       });
 
-      if (!entity || entity.event.id !== eventId) {
+      if (!entity) {
+        return ctx.notFound("Table not found");
+      }
+
+      const hasAccess = userEvents.some(
+        (e) => e.documentId === entity.event?.documentId
+      );
+
+      if (!hasAccess) {
         return ctx.forbidden("Access denied");
       }
 
-      delete ctx.request.body.data?.event;
+      // 🔒 evitar cambiar de evento
+      if (ctx.request.body.data?.event) {
+        delete ctx.request.body.data.event;
+      }
 
       return await super.update(ctx);
     },
 
+    // ─────────────────────────────────────────────
     async delete(ctx) {
-      const eventId = ctx.state.event.id;
+      const userEvents = ctx.state.events;
 
       const entity = await strapi.documents("api::table.table").findOne({
-        populate: ["event"],
         documentId: ctx.params.id,
+        populate: ["event"],
       });
 
-      if (!entity || entity.event.id !== eventId) {
+      if (!entity) {
+        return ctx.notFound("Table not found");
+      }
+
+      const hasAccess = userEvents.some(
+        (e) => e.documentId === entity.event?.documentId
+      );
+
+      if (!hasAccess) {
         return ctx.forbidden("Access denied");
       }
 
       return await super.delete(ctx);
     },
-  }),
+  })
 );

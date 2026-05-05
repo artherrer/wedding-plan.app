@@ -453,6 +453,7 @@ export interface ApiCompanionCompanion extends Struct.CollectionTypeSchema {
       'api::companion.companion'
     > &
       Schema.Attribute.Private;
+    note: Schema.Attribute.Text;
     phone: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
@@ -491,6 +492,7 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
     gift_message: Schema.Attribute.RichText;
     gift_registry: Schema.Attribute.Component<'event.gift-registry', true>;
     guests: Schema.Attribute.Relation<'oneToMany', 'api::guest.guest'>;
+    is_manageable: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::event.event'> &
       Schema.Attribute.Private;
@@ -507,6 +509,7 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    whatsapp_message: Schema.Attribute.RichText;
   };
 }
 
@@ -536,8 +539,7 @@ export interface ApiGuestGuest extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    event: Schema.Attribute.Relation<'manyToOne', 'api::event.event'> &
-      Schema.Attribute.Required;
+    event: Schema.Attribute.Relation<'manyToOne', 'api::event.event'>;
     full_name: Schema.Attribute.String & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::guest.guest'> &
@@ -550,14 +552,13 @@ export interface ApiGuestGuest extends Struct.CollectionTypeSchema {
         },
         number
       >;
+    note: Schema.Attribute.Text;
     phone: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     status: Schema.Attribute.Enumeration<['pending', 'yes', 'no']> &
       Schema.Attribute.DefaultTo<'pending'>;
     table: Schema.Attribute.Relation<'manyToOne', 'api::table.table'>;
-    unique_code: Schema.Attribute.String &
-      Schema.Attribute.Required &
-      Schema.Attribute.Unique;
+    unique_code: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -591,8 +592,7 @@ export interface ApiTableTable extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    event: Schema.Attribute.Relation<'manyToOne', 'api::event.event'> &
-      Schema.Attribute.Required;
+    event: Schema.Attribute.Relation<'manyToOne', 'api::event.event'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::table.table'> &
       Schema.Attribute.Private;
