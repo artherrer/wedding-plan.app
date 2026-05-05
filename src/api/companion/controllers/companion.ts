@@ -52,7 +52,7 @@ export default factories.createCoreController(
         .documents("api::companion.companion")
         .findOne({
           documentId: ctx.params.id,
-          populate: ["event", "guest"],
+          populate: ["guest.event"],
         });
 
       if (!entity) {
@@ -60,7 +60,7 @@ export default factories.createCoreController(
       }
 
       const hasAccess = userEvents.some(
-        (e) => e.documentId === entity.event?.documentId,
+        (e) => e.documentId === entity.guest.event?.documentId,
       );
 
       if (!hasAccess) {
@@ -74,7 +74,7 @@ export default factories.createCoreController(
           populate: ["event"],
         });
 
-        if (!guest || guest.event?.documentId !== entity.event?.documentId) {
+        if (!guest || guest.event?.documentId !== entity.guest.event?.documentId) {
           return ctx.forbidden("Invalid guest relation");
         }
       }

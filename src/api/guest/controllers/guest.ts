@@ -47,7 +47,7 @@ export default factories.createCoreController(
       let attempts = 0;
       do {
         const randomPart = Array.from({ length: 3 }, () =>
-          Math.floor(Math.random() * 10)
+          Math.floor(Math.random() * 10),
         ).join("");
         unique_code = `${initials}${randomPart}`;
         const existing = await strapi.documents("api::guest.guest").findMany({
@@ -69,7 +69,7 @@ export default factories.createCoreController(
       const userEvents = ctx.state.events;
 
       const entity = await strapi.documents("api::guest.guest").findOne({
-        populate: ["event"],
+        populate: ["event", "table"],
         documentId: ctx.params.id,
       });
 
@@ -83,6 +83,16 @@ export default factories.createCoreController(
 
       if (!hasAccess) {
         return ctx.forbidden("Access denied");
+      }
+
+      if (entity.table) {
+        await strapi.documents("api::table.table").update({
+          documentId: entity.table.documentId,
+          data: {
+            captain_guest: null,
+            captain_companion: null,
+          },
+        });
       }
 
       // 🔥 Evitar cambiar de evento
@@ -197,7 +207,7 @@ export default factories.createCoreController(
       }
 
       return {
-        data: guest
+        data: guest,
       };
     },
   }),
