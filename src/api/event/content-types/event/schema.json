@@ -112,6 +112,12 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "plugin::users-permissions.user"
+    },
+    "event_host_names": {
+      "type": "string"
+    },
+    "bank_name": {
+      "type": "string"
     }
   }
 }

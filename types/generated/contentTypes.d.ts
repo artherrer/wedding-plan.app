@@ -479,6 +479,7 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
     >;
     background_image: Schema.Attribute.Media<'images'>;
     bank_account: Schema.Attribute.String;
+    bank_name: Schema.Attribute.String;
     clabe: Schema.Attribute.String;
     color_palette: Schema.Attribute.JSON;
     confirmation_deadline: Schema.Attribute.Date;
@@ -488,6 +489,7 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
     dress_code: Schema.Attribute.String;
     dress_code_note: Schema.Attribute.Text;
     event_date: Schema.Attribute.DateTime & Schema.Attribute.Required;
+    event_host_names: Schema.Attribute.String;
     gallery_image: Schema.Attribute.Media<'images'>;
     gift_message: Schema.Attribute.RichText;
     gift_registry: Schema.Attribute.Component<'event.gift-registry', true>;
