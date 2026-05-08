@@ -1,0 +1,78 @@
+{
+  "kind": "collectionType",
+  "collectionName": "event_checklist_items",
+  "info": {
+    "singularName": "event-checklist-item",
+    "pluralName": "event-checklist-items",
+    "displayName": "EventChecklistItem"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "category": {
+      "type": "string"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    },
+    "checked": {
+      "type": "boolean",
+      "default": false
+    },
+    "checkedAt": {
+      "type": "datetime"
+    },
+    "dueDate": {
+      "type": "datetime"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "priority": {
+      "type": "enumeration",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium"
+    },
+    "isCustom": {
+      "type": "boolean",
+      "default": false
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    },
+    "event": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::event.event",
+      "inversedBy": "checklistItems"
+    },
+    "templateItem": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::checklist-template-item.checklist-template-item"
+    },
+    "attachments": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": [
+        "images",
+        "files"
+      ]
+    }
+  }
+}

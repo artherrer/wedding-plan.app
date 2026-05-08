@@ -127,7 +127,8 @@ export default factories.createCoreController(
     },
 
     async confirm(ctx) {
-      const { unique_code, status, confirmed_passes } = ctx.request.body as {
+      console.warn(ctx.request.body)
+      const { unique_code, status, confirmed_passes } = ctx.request.body.data as {
         unique_code?: string;
         status?: string;
         confirmed_passes?: number;

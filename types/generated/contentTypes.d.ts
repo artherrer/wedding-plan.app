@@ -430,6 +430,120 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiChecklistSectionChecklistSection
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'checklist_sections';
+  info: {
+    displayName: 'ChecklistSection';
+    pluralName: 'checklist-sections';
+    singularName: 'checklist-section';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    items: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::checklist-template-item.checklist-template-item'
+    >;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::checklist-section.checklist-section'
+    > &
+      Schema.Attribute.Private;
+    order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    publishedAt: Schema.Attribute.DateTime;
+    template: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::checklist-template.checklist-template'
+    >;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiChecklistTemplateItemChecklistTemplateItem
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'checklist_template_items';
+  info: {
+    displayName: 'ChecklistTemplateItem';
+    pluralName: 'checklist-template-items';
+    singularName: 'checklist-template-item';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    estimatedDaysBeforeEvent: Schema.Attribute.Integer;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::checklist-template-item.checklist-template-item'
+    > &
+      Schema.Attribute.Private;
+    order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    publishedAt: Schema.Attribute.DateTime;
+    required: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    section: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::checklist-section.checklist-section'
+    >;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiChecklistTemplateChecklistTemplate
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'checklist_templates';
+  info: {
+    displayName: 'ChecklistTemplate';
+    pluralName: 'checklist-templates';
+    singularName: 'checklist-template';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    isDefault: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::checklist-template.checklist-template'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    sections: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::checklist-section.checklist-section'
+    >;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    type: Schema.Attribute.Enumeration<['wedding', 'birthday', 'corporate']> &
+      Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiCompanionCompanion extends Struct.CollectionTypeSchema {
   collectionName: 'companions';
   info: {
@@ -462,6 +576,52 @@ export interface ApiCompanionCompanion extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiEventChecklistItemEventChecklistItem
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'event_checklist_items';
+  info: {
+    displayName: 'EventChecklistItem';
+    pluralName: 'event-checklist-items';
+    singularName: 'event-checklist-item';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    attachments: Schema.Attribute.Media<'images' | 'files', true>;
+    category: Schema.Attribute.String;
+    checked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    checkedAt: Schema.Attribute.DateTime;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    dueDate: Schema.Attribute.DateTime;
+    event: Schema.Attribute.Relation<'manyToOne', 'api::event.event'>;
+    hidden: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    isCustom: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::event-checklist-item.event-checklist-item'
+    > &
+      Schema.Attribute.Private;
+    notes: Schema.Attribute.Text;
+    order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    priority: Schema.Attribute.Enumeration<['low', 'medium', 'high']> &
+      Schema.Attribute.DefaultTo<'medium'>;
+    publishedAt: Schema.Attribute.DateTime;
+    templateItem: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::checklist-template-item.checklist-template-item'
+    >;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiEventEvent extends Struct.CollectionTypeSchema {
   collectionName: 'events';
   info: {
@@ -480,6 +640,10 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
     background_image: Schema.Attribute.Media<'images'>;
     bank_account: Schema.Attribute.String;
     bank_name: Schema.Attribute.String;
+    checklistItems: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::event-checklist-item.event-checklist-item'
+    >;
     clabe: Schema.Attribute.String;
     color_palette: Schema.Attribute.JSON;
     confirmation_deadline: Schema.Attribute.Date;
@@ -508,6 +672,12 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
     slug: Schema.Attribute.UID<'name'>;
     subtitle: Schema.Attribute.String;
     tables: Schema.Attribute.Relation<'oneToMany', 'api::table.table'>;
+    template: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::checklist-template.checklist-template'
+    >;
+    type: Schema.Attribute.Enumeration<['wedding', 'birthday', 'corporate']> &
+      Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1117,7 +1287,11 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::checklist-section.checklist-section': ApiChecklistSectionChecklistSection;
+      'api::checklist-template-item.checklist-template-item': ApiChecklistTemplateItemChecklistTemplateItem;
+      'api::checklist-template.checklist-template': ApiChecklistTemplateChecklistTemplate;
       'api::companion.companion': ApiCompanionCompanion;
+      'api::event-checklist-item.event-checklist-item': ApiEventChecklistItemEventChecklistItem;
       'api::event.event': ApiEventEvent;
       'api::guest.guest': ApiGuestGuest;
       'api::table.table': ApiTableTable;

@@ -118,6 +118,26 @@
     },
     "bank_name": {
       "type": "string"
+    },
+    "checklistItems": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::event-checklist-item.event-checklist-item",
+      "mappedBy": "event"
+    },
+    "type": {
+      "type": "enumeration",
+      "required": true,
+      "enum": [
+        "wedding",
+        "birthday",
+        "corporate"
+      ]
+    },
+    "template": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::checklist-template.checklist-template"
     }
   }
 }

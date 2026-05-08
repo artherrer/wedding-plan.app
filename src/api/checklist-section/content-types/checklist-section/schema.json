@@ -1,0 +1,38 @@
+{
+  "kind": "collectionType",
+  "collectionName": "checklist_sections",
+  "info": {
+    "singularName": "checklist-section",
+    "pluralName": "checklist-sections",
+    "displayName": "ChecklistSection"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    },
+    "template": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::checklist-template.checklist-template",
+      "inversedBy": "sections"
+    },
+    "items": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::checklist-template-item.checklist-template-item",
+      "mappedBy": "section"
+    }
+  }
+}

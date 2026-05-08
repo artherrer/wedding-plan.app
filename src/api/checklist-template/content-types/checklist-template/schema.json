@@ -1,0 +1,46 @@
+{
+  "kind": "collectionType",
+  "collectionName": "checklist_templates",
+  "info": {
+    "singularName": "checklist-template",
+    "pluralName": "checklist-templates",
+    "displayName": "ChecklistTemplate"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "wedding",
+        "birthday",
+        "corporate"
+      ],
+      "required": true
+    },
+    "isDefault": {
+      "type": "boolean",
+      "default": false
+    },
+    "sections": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::checklist-section.checklist-section",
+      "mappedBy": "template"
+    }
+  }
+}

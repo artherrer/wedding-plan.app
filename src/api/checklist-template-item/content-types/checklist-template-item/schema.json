@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "checklist_template_items",
+  "info": {
+    "singularName": "checklist-template-item",
+    "pluralName": "checklist-template-items",
+    "displayName": "ChecklistTemplateItem"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    },
+    "required": {
+      "type": "boolean",
+      "default": false
+    },
+    "estimatedDaysBeforeEvent": {
+      "type": "integer"
+    },
+    "section": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::checklist-section.checklist-section",
+      "inversedBy": "items"
+    }
+  }
+}
