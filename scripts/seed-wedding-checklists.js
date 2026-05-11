@@ -7,9 +7,11 @@ const TEMPLATE_UID = "api::checklist-template.checklist-template";
 const SECTION_UID = "api::checklist-section.checklist-section";
 const ITEM_UID = "api::checklist-template-item.checklist-template-item";
 
+const TEMPLATE_SLUG = "wedding-template";
+
 async function bootstrap() {
   console.warn(
-    "⚠️ WARNING: This script will seed the database with a default wedding checklist template. It is idempotent and will not create duplicates, but it is recommended to run it only once."
+    "⚠️ WARNING: This script will seed the database with a default wedding checklist template. It is idempotent and will not create duplicates, but it is recommended to run it only once.",
   );
 
   // Inicializar Strapi sin servidor HTTP
@@ -28,11 +30,8 @@ async function bootstrap() {
   // =====================================================
 
   try {
-    const existingTemplates = await strapi.db.query(TEMPLATE_UID).findMany({
-      where: {
-        slug: "wedding-master-template",
-      },
-      limit: 1,
+    const existingTemplates = await strapi.documents(TEMPLATE_UID).findMany({
+      filters: { slug: { $eq: TEMPLATE_SLUG } },
     });
 
     if (existingTemplates && existingTemplates.length > 0) {
@@ -48,15 +47,15 @@ async function bootstrap() {
   // Crear template
   // =====================================================
 
-  const template = await strapi.db.query(TEMPLATE_UID).create({
+  const template = await strapi.documents(TEMPLATE_UID).create({
     data: {
       title: "Wedding Master Template",
-      slug: "wedding-master-template",
+      slug: TEMPLATE_SLUG,
       description: "Checklist completo para organización de bodas",
       type: "wedding",
       isDefault: true,
-      publishedAt: new Date(),
     },
+    status: "published",
   });
 
   console.log("✅ Template created:", template.id);
@@ -377,13 +376,13 @@ async function bootstrap() {
   // =====================================================
 
   for (const sectionData of sections) {
-    const section = await strapi.db.query(SECTION_UID).create({
+    const section = await strapi.documents(SECTION_UID).create({
       data: {
         title: sectionData.title,
         order: sectionData.order,
-        template: template.id,
-        publishedAt: new Date(),
+        template: template.documentId,
       },
+      status: "published",
     });
 
     console.log(`📂 Section created: ${section.title}`);
@@ -391,14 +390,15 @@ async function bootstrap() {
     let itemOrder = 1;
 
     for (const title of sectionData.items) {
-      await strapi.db.query(ITEM_UID).create({
+      await strapi.documents(ITEM_UID).create({
         data: {
           title,
           order: itemOrder++,
           required: false,
-          section: section.id,
+          section: section.documentId,
           publishedAt: new Date(),
         },
+        status: "published",
       });
 
       console.log(`   ✅ ${title}`);

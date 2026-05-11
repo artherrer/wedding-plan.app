@@ -7,6 +7,8 @@ const TEMPLATE_UID = "api::checklist-template.checklist-template";
 const SECTION_UID = "api::checklist-section.checklist-section";
 const ITEM_UID = "api::checklist-template-item.checklist-template-item";
 
+const TEMPLATE_SLUG = "baptism-template";
+
 async function bootstrap() {
   console.warn(
     "⚠️ WARNING: This script will seed the database with a default baptism checklist template for Mexico. It is idempotent and will not create duplicates, but it is recommended to run it only once."
@@ -28,12 +30,9 @@ async function bootstrap() {
   // =====================================================
 
   try {
-    const existingTemplates = await strapi.db.query(TEMPLATE_UID).findMany({
-      where: {
-        slug: "baptism-mexico-template",
-      },
-      limit: 1,
-    });
+    const existingTemplates = await strapi.documents(TEMPLATE_UID).findMany(
+        { filters: { slug: { $eq: TEMPLATE_SLUG } } }
+    );
 
     if (existingTemplates && existingTemplates.length > 0) {
       console.log("✅ Baptism template already exists");
@@ -48,15 +47,15 @@ async function bootstrap() {
   // Crear template
   // =====================================================
 
-  const template = await strapi.db.query(TEMPLATE_UID).create({
+  const template = await strapi.documents(TEMPLATE_UID).create({
     data: {
       title: "Baptism Checklist Mexico",
-      slug: "baptism-mexico-template",
+      slug: TEMPLATE_SLUG,
       description: "Checklist completo para organización de bautizos en México",
       type: "baptism",
       isDefault: false,
-      publishedAt: new Date(),
     },
+    status: "published",
   });
 
   console.log("✅ Template created:", template.id);
@@ -355,13 +354,13 @@ async function bootstrap() {
   // =====================================================
 
   for (const sectionData of sections) {
-    const section = await strapi.db.query(SECTION_UID).create({
+    const section = await strapi.documents(SECTION_UID).create({
       data: {
         title: sectionData.title,
         order: sectionData.order,
-        template: template.id,
-        publishedAt: new Date(),
+        template: template.documentId,
       },
+      status: "published",
     });
 
     console.log(`📂 Section created: ${section.title}`);
@@ -369,14 +368,14 @@ async function bootstrap() {
     let itemOrder = 1;
 
     for (const title of sectionData.items) {
-      await strapi.db.query(ITEM_UID).create({
+      await strapi.documents(ITEM_UID).create({
         data: {
           title,
           order: itemOrder++,
           required: false,
-          section: section.id,
-          publishedAt: new Date(),
+          section: section.documentId,
         },
+        status: "published",
       });
 
       console.log(`   ✅ ${title.substring(0, 60)}${title.length > 60 ? "..." : ""}`);

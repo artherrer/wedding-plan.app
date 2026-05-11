@@ -546,7 +546,9 @@ export interface ApiChecklistTemplateChecklistTemplate
     >;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
-    type: Schema.Attribute.Enumeration<['wedding', 'birthday', 'corporate']> &
+    type: Schema.Attribute.Enumeration<
+      ['wedding', 'birthday', 'corporate', 'baptism']
+    > &
       Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

@@ -40,7 +40,7 @@ export default {
           // Crear checklist items del evento
           for (const section of template.sections || []) {
             for (const item of section.items || []) {
-              const newItem = await strapi
+              await strapi
                 .documents("api::event-checklist-item.event-checklist-item")
                 .create({
                   data: {
@@ -56,14 +56,9 @@ export default {
                     // Relaciones
                     event: result.documentId,
                     templateItem: item.documentId,
-
-                    publishedAt: new Date().toISOString(),
                   },
+                  status: "published",
                 });
-
-              await strapi
-                .documents("api::event-checklist-item.event-checklist-item")
-                .publish(newItem);
 
               counter++;
             }
@@ -85,82 +80,147 @@ export default {
     );
   },
 
-  // async afterUpdate(event) {
-  //   const { result, params } = event;
+  async afterUpdate(event) {
+    const { result, params } = event;
 
-  //   console.warn("afterUpdate event triggered for event content type");
-  //   console.warn("Result:", result);
-  //   console.warn("Params:", params.data?.template);
+    console.warn("afterUpdate event triggered for event content type");
 
-  //   const eventPopulated = await strapi.documents("api::event.event").findOne({
-  //     documentId: result.documentId,
-  //     populate: ["template"],
-  //   });
+    console.warn(
+      "params.data?.template?.connect",
+      params.data?.template?.connect,
+    );
 
-  //   const template = await strapi
-  //     .documents("api::checklist-template.checklist-template")
-  //     .findOne({
-  //       documentId: eventPopulated.template.documentId,
-  //       populate: ["sections.items"],
-  //     });
+    console.warn(
+      "params.data?.template?.disconnect",
+      params.data?.template?.disconnect,
+    );
 
-  //   if (!template) {
-  //     console.warn(
-  //       `Checklist template with ID ${eventPopulated.template.documentId} not found. Skipping checklist item update.`,
-  //     );
-  //     return;
-  //   }
+    const connectIds =
+      params.data?.template?.connect?.map((item) => item.id) || [];
 
-  //   console.log(
-  //     `Found checklist template: ${template.title} with ${template.sections.length} sections.`,
-  //   );
+    const disconnectIds =
+      params.data?.template?.disconnect?.map((item) => item.id) || [];
 
-  //   await strapi.db.transaction(
-  //     async ({ trx, rollback, commit, onCommit, onRollback }) => {
-  //       try {
-  //         // Eliminar checklist items antiguos
-  //         await strapi
-  //           .documents("api::event-checklist-item.event-checklist-item")
-  //           .deleteMany({
-  //             where: { event: result.documentId },
-  //           });
+    // Comparación exacta
+    const sameIds =
+      connectIds.length === disconnectIds.length &&
+      connectIds.every((id) => disconnectIds.includes(id));
 
-  //         // Crear nuevos checklist items del evento
-  //         for (const section of template.sections || []) {
-  //           for (const item of section.items || []) {
-  //             await strapi
-  //               .documents("api::event-checklist-item.event-checklist-item")
-  //               .create({
-  //                 data: {
-  //                   title: item.title,
-  //                   description: item.description,
+    console.warn("Same IDs:", sameIds);
 
-  //                   // Snapshot
-  //                   category: section.title,
-  //                   order: item.order,
+    const hasTemplateChanged = !sameIds;
 
-  //                   checked: false,
+    console.warn("Template changed:", hasTemplateChanged);
 
-  //                   // Relaciones
-  //                   event: result.documentId,
-  //                   templateItem: item.documentId,
+    // Si no tiene template o no cambió, no hacemos nada
+    if (!result.template || !hasTemplateChanged) {
+      console.warn("No template change detected. Skipping checklist update.");
+      return;
+    }
 
-  //                   publishedAt: new Date().toISOString(),
-  //                 },
-  //               });
-  //           }
-  //         }
+    // Obtener el evento con el template poblado
+    const eventPopulated = await strapi.documents("api::event.event").findOne({
+      documentId: result.documentId,
+      populate: ["template"],
+    });
 
-  //         await commit();
-  //       } catch (error) {
-  //         console.error(
-  //           "Error in afterUpdate lifecycle for event content type:",
-  //           error,
-  //         );
-  //         await rollback();
-  //         return;
-  //       }
-  //     },
-  //   );
-  // },
+    if (!eventPopulated.template) {
+      console.warn(`Event ${result.documentId} has no template assigned.`);
+      return;
+    }
+
+    // Obtener el nuevo template con todas sus secciones e items
+    const template = await strapi
+      .documents("api::checklist-template.checklist-template")
+      .findOne({
+        documentId: eventPopulated.template.documentId,
+        populate: ["sections", "sections.items"],
+      });
+
+    if (!template) {
+      console.warn(
+        `Checklist template with ID ${eventPopulated.template.documentId} not found. Skipping checklist item update.`,
+      );
+      return;
+    }
+
+    console.log(
+      `Found checklist template: ${template.title} with ${template.sections?.length || 0} sections.`,
+    );
+
+    try {
+      // Opción 1: Reemplazar completamente los items (si quieres sincronización total)
+      console.log("Deleting old checklist items...");
+
+      // Buscar y eliminar todos los items antiguos del evento
+      const existingItems = await strapi
+        .documents("api::event-checklist-item.event-checklist-item")
+        .findMany({
+          filters: {
+            event: {
+              documentId: {
+                $eq: result.documentId,
+              },
+            },
+          },
+          limit: 9999, // Ajusta según necesidad
+        });
+
+      // Eliminar cada item individualmente (Strapi v5 no tiene deleteMany con filtros complejos)
+      for (const item of existingItems || []) {
+        await strapi
+          .documents("api::event-checklist-item.event-checklist-item")
+          .delete({
+            documentId: item.documentId,
+          });
+        console.log(`  Deleted item: ${item.title}`);
+      }
+
+      console.log(`Deleted ${existingItems.length || 0} old items`);
+
+      // Crear nuevos checklist items basados en el nuevo template
+      let counter = 0;
+
+      for (const section of template.sections || []) {
+        for (const item of section.items || []) {
+          const newItem = await strapi
+            .documents("api::event-checklist-item.event-checklist-item")
+            .create({
+              data: {
+                title: item.title,
+                description: item.description,
+
+                // Snapshot
+                category: section.title,
+                order: item.order,
+
+                checked: false, // Resetear el estado checked
+
+                // Relaciones
+                event: result.documentId,
+                templateItem: item.documentId,
+              },
+              status: "published",
+            });
+
+          await strapi
+            .documents("api::event-checklist-item.event-checklist-item")
+            .publish(newItem);
+
+          counter++;
+          console.log(`  Created item: ${item.title}`);
+        }
+      }
+
+      console.log(
+        `✅ Updated ${counter} checklist items for event: ${result.documentId}`,
+      );
+    } catch (error) {
+      console.error(
+        "Error in afterUpdate lifecycle for event content type:",
+        error,
+      );
+      throw error; // Re-lanzar el error para que Strapi lo maneje
+    }
+  },
 };

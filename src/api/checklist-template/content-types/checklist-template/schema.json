@@ -25,12 +25,13 @@
     },
     "type": {
       "type": "enumeration",
+      "required": true,
       "enum": [
         "wedding",
         "birthday",
-        "corporate"
-      ],
-      "required": true
+        "corporate",
+        "baptism"
+      ]
     },
     "isDefault": {
       "type": "boolean",
