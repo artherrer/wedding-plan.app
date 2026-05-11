@@ -1,17 +1,25 @@
-import { createStrapi, compileStrapi } from "@strapi/strapi";
+"use strict";
+
+const { createStrapi } = require("@strapi/strapi");
+const { join } = require("path");
 
 const TEMPLATE_UID = "api::checklist-template.checklist-template";
-
 const SECTION_UID = "api::checklist-section.checklist-section";
-
 const ITEM_UID = "api::checklist-template-item.checklist-template-item";
 
 async function bootstrap() {
   console.warn(
-    "⚠️ WARNING: This script will seed the database with a default wedding checklist template. It is idempotent and will not create duplicates, but it is recommended to run it only once.",
+    "⚠️ WARNING: This script will seed the database with a default wedding checklist template. It is idempotent and will not create duplicates, but it is recommended to run it only once."
   );
-  const appContext = await compileStrapi();
-  const strapi = await createStrapi(appContext).load();
+
+  // Inicializar Strapi sin servidor HTTP
+  const strapi = createStrapi({
+    distDir: join(process.cwd(), "dist"),
+    serveAdminPanel: false,
+    autoReload: false,
+  });
+
+  await strapi.load();
 
   console.log("🌱 Starting checklist seed...");
 
@@ -19,35 +27,39 @@ async function bootstrap() {
   // Evitar duplicados
   // =====================================================
 
-  const existingTemplates = await strapi.documents(TEMPLATE_UID).findMany({
-    filters: {
-      slug: "wedding-master-template",
-    },
-    limit: 1,
-  });
+  try {
+    const existingTemplates = await strapi.db.query(TEMPLATE_UID).findMany({
+      where: {
+        slug: "wedding-master-template",
+      },
+      limit: 1,
+    });
 
-  if (existingTemplates.length > 0) {
-    console.log("✅ Template already exists");
-    process.exit(0);
+    if (existingTemplates && existingTemplates.length > 0) {
+      console.log("✅ Template already exists");
+      await strapi.destroy();
+      process.exit(0);
+    }
+  } catch (error) {
+    console.log("No existing template found, continuing...");
   }
 
   // =====================================================
   // Crear template
   // =====================================================
 
-  const template = await strapi.documents(TEMPLATE_UID).create({
+  const template = await strapi.db.query(TEMPLATE_UID).create({
     data: {
       title: "Wedding Master Template",
       slug: "wedding-master-template",
       description: "Checklist completo para organización de bodas",
       type: "wedding",
       isDefault: true,
+      publishedAt: new Date(),
     },
   });
 
-  await strapi.documents(TEMPLATE_UID).publish({ documentId: template.documentId });
-
-  console.log("✅ Template created");
+  console.log("✅ Template created:", template.id);
 
   // =====================================================
   // Datos
@@ -69,7 +81,6 @@ async function bootstrap() {
         "Definir paleta de colores",
       ],
     },
-
     {
       title: "Reservas Principales",
       order: 2,
@@ -92,7 +103,6 @@ async function bootstrap() {
         "Confirmar costo y pagos del civil",
       ],
     },
-
     {
       title: "Proveedores Principales",
       order: 3,
@@ -131,7 +141,6 @@ async function bootstrap() {
         "Comprar vino para brindis",
       ],
     },
-
     {
       title: "Invitados",
       order: 4,
@@ -153,7 +162,6 @@ async function bootstrap() {
         "Imprimir números de mesa",
       ],
     },
-
     {
       title: "Novia",
       order: 5,
@@ -177,7 +185,6 @@ async function bootstrap() {
         "Preparar kit de emergencia",
       ],
     },
-
     {
       title: "Novio",
       order: 6,
@@ -196,7 +203,6 @@ async function bootstrap() {
         "Preparar kit personal del día",
       ],
     },
-
     {
       title: "Cortejo y Familia",
       order: 7,
@@ -211,7 +217,6 @@ async function bootstrap() {
         "Organizar fotos familiares",
       ],
     },
-
     {
       title: "Detalles de la Ceremonia",
       order: 8,
@@ -230,7 +235,6 @@ async function bootstrap() {
         "Definir mesa de ceremonia",
       ],
     },
-
     {
       title: "Recepción",
       order: 9,
@@ -252,7 +256,6 @@ async function bootstrap() {
         "Comprar sandalias o pashminas",
       ],
     },
-
     {
       title: "Papelería",
       order: 10,
@@ -266,7 +269,6 @@ async function bootstrap() {
         "Diseñar señalización",
       ],
     },
-
     {
       title: "Hospedaje y Transporte",
       order: 11,
@@ -279,7 +281,6 @@ async function bootstrap() {
         "Definir estacionamiento o valet parking",
       ],
     },
-
     {
       title: "Luna de Miel",
       order: 12,
@@ -293,7 +294,6 @@ async function bootstrap() {
         "Preparar presupuesto",
       ],
     },
-
     {
       title: "1 Mes Antes",
       order: 13,
@@ -308,7 +308,6 @@ async function bootstrap() {
         "Preparar kit de emergencia",
       ],
     },
-
     {
       title: "Semana de la Boda",
       order: 14,
@@ -325,7 +324,6 @@ async function bootstrap() {
         "Comer e hidratarse",
       ],
     },
-
     {
       title: "Día de la Boda",
       order: 15,
@@ -345,7 +343,6 @@ async function bootstrap() {
         "Confirmar transporte final",
       ],
     },
-
     {
       title: "Después de la Boda",
       order: 16,
@@ -359,7 +356,6 @@ async function bootstrap() {
         "Hacer álbum",
       ],
     },
-
     {
       title: "Extras MUY recomendables",
       order: 17,
@@ -381,33 +377,29 @@ async function bootstrap() {
   // =====================================================
 
   for (const sectionData of sections) {
-    const section = await strapi.documents(SECTION_UID).create({
+    const section = await strapi.db.query(SECTION_UID).create({
       data: {
         title: sectionData.title,
         order: sectionData.order,
-
-        template: template.documentId,
+        template: template.id,
+        publishedAt: new Date(),
       },
     });
-
-    await strapi.documents(SECTION_UID).publish({ documentId: section.documentId });
 
     console.log(`📂 Section created: ${section.title}`);
 
     let itemOrder = 1;
 
     for (const title of sectionData.items) {
-      const item = await strapi.documents(ITEM_UID).create({
+      await strapi.db.query(ITEM_UID).create({
         data: {
           title,
           order: itemOrder++,
           required: false,
-
-          section: section.documentId,
+          section: section.id,
+          publishedAt: new Date(),
         },
       });
-
-      await strapi.documents(ITEM_UID).publish({ documentId: item.documentId });
 
       console.log(`   ✅ ${title}`);
     }
@@ -415,10 +407,11 @@ async function bootstrap() {
 
   console.log("🎉 Checklist seed completed");
 
+  await strapi.destroy();
   process.exit(0);
 }
 
 bootstrap().catch((error) => {
-  console.error(error);
+  console.error("❌ Error during bootstrap:", error);
   process.exit(1);
 });

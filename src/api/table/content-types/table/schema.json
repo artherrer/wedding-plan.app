@@ -9,9 +9,10 @@
   "options": {
     "draftAndPublish": false
   },
+  "pluginOptions": {},
   "attributes": {
-    "number": {
-      "type": "integer",
+    "name": {
+      "type": "string",
       "required": true
     },
     "capacity": {
