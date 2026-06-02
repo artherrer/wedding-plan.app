@@ -131,7 +131,8 @@
       "enum": [
         "wedding",
         "birthday",
-        "corporate"
+        "corporate",
+        "baptism"
       ]
     },
     "template": {

@@ -688,7 +688,9 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
       'manyToOne',
       'api::checklist-template.checklist-template'
     >;
-    type: Schema.Attribute.Enumeration<['wedding', 'birthday', 'corporate']> &
+    type: Schema.Attribute.Enumeration<
+      ['wedding', 'birthday', 'corporate', 'baptism']
+    > &
       Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
