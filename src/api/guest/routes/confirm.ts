@@ -12,5 +12,11 @@ export default {
       handler: "guest.getInvitation",
       config: { auth: false },
     },
+    {
+      method: "GET",
+      path: "/guests/search/:eventDocumentId",
+      handler: "guest.searchGuests",
+      config: { auth: false },
+    },
   ],
 };

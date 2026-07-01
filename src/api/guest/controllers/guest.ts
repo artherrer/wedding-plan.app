@@ -182,6 +182,74 @@ export default factories.createCoreController(
       };
     },
 
+    async searchGuests(ctx) {
+      const { eventDocumentId } = ctx.params as { eventDocumentId: string };
+      const q = ((ctx.query.q as string) ?? "").trim();
+
+      if (q.length < 2) {
+        return { data: [] };
+      }
+
+      const guests = await strapi.documents("api::guest.guest").findMany({
+        filters: {
+          event: { documentId: { $eq: eventDocumentId } },
+          $or: [
+            { full_name: { $containsi: q } },
+            { companions: { full_name: { $containsi: q } } },
+          ],
+        },
+        populate: { companions: true },
+        limit: 50,
+      });
+
+      const qLower = q.toLowerCase();
+
+      type Match = {
+        nombre: string;
+        codigo: string;
+        esAcompanante: boolean;
+        nombrePadre?: string;
+        index: number;
+      };
+
+      const matches: Match[] = [];
+
+      guests.forEach((guest) => {
+        const guestIndex = guest.full_name.toLowerCase().indexOf(qLower);
+        if (guestIndex !== -1) {
+          matches.push({
+            nombre: guest.full_name,
+            codigo: guest.unique_code,
+            esAcompanante: false,
+            index: guestIndex,
+          });
+        }
+
+        guest.companions?.forEach((companion) => {
+          const companionIndex = companion.full_name
+            .toLowerCase()
+            .indexOf(qLower);
+          if (companionIndex !== -1) {
+            matches.push({
+              nombre: companion.full_name,
+              codigo: guest.unique_code,
+              esAcompanante: true,
+              nombrePadre: guest.full_name,
+              index: companionIndex,
+            });
+          }
+        });
+      });
+
+      matches.sort((a, b) => a.index - b.index);
+
+      const data = matches
+        .slice(0, 5)
+        .map(({ index, ...persona }) => persona);
+
+      return { data };
+    },
+
     async getInvitation(ctx) {
       const { eventDocumentId, code } = ctx.params as {
         eventDocumentId: string;
@@ -198,6 +266,7 @@ export default factories.createCoreController(
             populate: ["gift_registry", "schedule", "locations"],
           },
           companions: true,
+          table: true,
         },
       });
 
