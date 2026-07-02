@@ -668,7 +668,9 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
     dress_code_note: Schema.Attribute.Text;
     event_date: Schema.Attribute.DateTime & Schema.Attribute.Required;
     event_host_names: Schema.Attribute.String;
-    gallery_image: Schema.Attribute.Media<'images'>;
+    gallery_image: Schema.Attribute.Media<'images', true>;
+    gift_bank_message: Schema.Attribute.RichText;
+    gift_cash_message: Schema.Attribute.RichText;
     gift_message: Schema.Attribute.RichText;
     gift_registry: Schema.Attribute.Component<'event.gift-registry', true>;
     guests: Schema.Attribute.Relation<'oneToMany', 'api::guest.guest'>;

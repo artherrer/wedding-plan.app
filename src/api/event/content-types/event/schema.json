@@ -41,7 +41,7 @@
     },
     "gallery_image": {
       "type": "media",
-      "multiple": false,
+      "multiple": true,
       "allowedTypes": [
         "images"
       ]
@@ -139,6 +139,12 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::checklist-template.checklist-template"
+    },
+    "gift_cash_message": {
+      "type": "richtext"
+    },
+    "gift_bank_message": {
+      "type": "richtext"
     }
   }
 }
