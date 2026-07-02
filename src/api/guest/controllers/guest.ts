@@ -128,11 +128,13 @@ export default factories.createCoreController(
 
     async confirm(ctx) {
       console.warn(ctx.request.body)
-      const { unique_code, status, confirmed_passes } = ctx.request.body.data as {
-        unique_code?: string;
-        status?: string;
-        confirmed_passes?: number;
-      };
+      const { unique_code, status, confirmed_passes, dietary_restrictions } =
+        ctx.request.body.data as {
+          unique_code?: string;
+          status?: string;
+          confirmed_passes?: number;
+          dietary_restrictions?: string | null;
+        };
 
       if (!unique_code) {
         return ctx.badRequest("unique_code is required");
@@ -165,8 +167,10 @@ export default factories.createCoreController(
         }
 
         updateData.confirmed_passes = passes;
+        updateData.dietary_restrictions = dietary_restrictions ?? null;
       } else {
         updateData.confirmed_passes = 0;
+        updateData.dietary_restrictions = null;
       }
 
       const updated = await strapi.documents("api::guest.guest").update({
@@ -179,6 +183,7 @@ export default factories.createCoreController(
         status: updated.status,
         confirmed_passes: updated.confirmed_passes,
         max_passes: updated.max_passes,
+        dietary_restrictions: updated.dietary_restrictions,
       };
     },
 

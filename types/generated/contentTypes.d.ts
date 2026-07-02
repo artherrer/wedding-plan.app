@@ -729,6 +729,7 @@ export interface ApiGuestGuest extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    dietary_restrictions: Schema.Attribute.Text;
     event: Schema.Attribute.Relation<'manyToOne', 'api::event.event'>;
     full_name: Schema.Attribute.String & Schema.Attribute.Required;
     invited_by: Schema.Attribute.Enumeration<['novio', 'novia']>;

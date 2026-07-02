@@ -60,6 +60,9 @@
     "note": {
       "type": "text"
     },
+    "dietary_restrictions": {
+      "type": "text"
+    },
     "self_payed": {
       "type": "boolean",
       "default": false
