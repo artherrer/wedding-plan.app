@@ -685,6 +685,7 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
     name: Schema.Attribute.String & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
     schedule: Schema.Attribute.Component<'event.schedule-item', true>;
+    site_url: Schema.Attribute.String & Schema.Attribute.Required;
     slug: Schema.Attribute.UID<'name'>;
     subtitle: Schema.Attribute.String;
     tables: Schema.Attribute.Relation<'oneToMany', 'api::table.table'>;

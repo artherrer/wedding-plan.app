@@ -11,6 +11,10 @@
   },
   "pluginOptions": {},
   "attributes": {
+    "site_url": {
+      "type": "string",
+      "required": true
+    },
     "name": {
       "type": "string",
       "required": true
