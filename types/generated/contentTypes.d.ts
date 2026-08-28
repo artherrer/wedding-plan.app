@@ -664,6 +664,7 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    customer_email: Schema.Attribute.String;
     dress_code: Schema.Attribute.String;
     dress_code_note: Schema.Attribute.Text;
     event_date: Schema.Attribute.DateTime & Schema.Attribute.Required;

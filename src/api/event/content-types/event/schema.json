@@ -149,6 +149,9 @@
     },
     "gift_bank_message": {
       "type": "richtext"
+    },
+    "customer_email": {
+      "type": "string"
     }
   }
 }

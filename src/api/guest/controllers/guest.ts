@@ -127,7 +127,7 @@ export default factories.createCoreController(
     },
 
     async confirm(ctx) {
-      console.warn(ctx.request.body)
+      console.warn(ctx.request.body);
       const { unique_code, status, confirmed_passes, dietary_restrictions } =
         ctx.request.body.data as {
           unique_code?: string;
@@ -156,6 +156,28 @@ export default factories.createCoreController(
       }
 
       const updateData: Record<string, unknown> = { status };
+
+      const event = guest.event;
+
+      if (guest.event.customer_email) {
+        try {
+          const text = `Hola.\n\n ${guest.full_name} ha ${status === "yes" ? "confirmado" : "rechazado"} su asistencia al evento ${event?.name || "evento"}.`;
+
+          const emails = guest.event.customer_email
+            .split(",")
+            .map((email) => email.trim());
+
+          await strapi.plugins["email"].services.email.send({
+            to: emails,
+            subject:
+              "Actualización de asistencia a " + (event?.name || "evento"),
+            text,
+            html: `<p>${text}</p>`,
+          });
+        } catch (error) {
+          console.error("Error sending email:", error);
+        }
+      }
 
       if (status === "yes") {
         const passes = confirmed_passes ?? guest.max_passes;
@@ -248,9 +270,7 @@ export default factories.createCoreController(
 
       matches.sort((a, b) => a.index - b.index);
 
-      const data = matches
-        .slice(0, 5)
-        .map(({ index, ...persona }) => persona);
+      const data = matches.slice(0, 5).map(({ index, ...persona }) => persona);
 
       return { data };
     },
