@@ -31,6 +31,22 @@ export default factories.createCoreController(
     },
 
     async create(ctx) {
+      const providedCode =
+        typeof ctx.request.body.data?.unique_code === "string"
+          ? ctx.request.body.data.unique_code.trim()
+          : "";
+
+      if (providedCode) {
+        const existing = await strapi.documents("api::guest.guest").findMany({
+          filters: { unique_code: { $eq: providedCode } },
+        });
+        if (existing.length > 0) {
+          return ctx.badRequest(`unique_code "${providedCode}" already exists`);
+        }
+        ctx.request.body.data.unique_code = providedCode;
+        return await super.create(ctx);
+      }
+
       if (ctx.request.body.data) {
         delete ctx.request.body.data.unique_code;
       }
