@@ -67,6 +67,10 @@
       "type": "boolean",
       "default": false
     },
+    "is_minor": {
+      "type": "boolean",
+      "default": false
+    },
     "invited_by": {
       "type": "enumeration",
       "enum": [

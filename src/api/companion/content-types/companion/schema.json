@@ -15,6 +15,10 @@
       "type": "string",
       "required": true
     },
+    "unique_code": {
+      "type": "string",
+      "unique": true
+    },
     "phone": {
       "type": "string"
     },
@@ -33,6 +37,10 @@
       "type": "text"
     },
     "self_payed": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_minor": {
       "type": "boolean",
       "default": false
     },

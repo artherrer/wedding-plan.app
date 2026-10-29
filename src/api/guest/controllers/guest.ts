@@ -3,6 +3,7 @@
  */
 
 import { factories } from "@strapi/strapi";
+import { generateUniqueCode } from "../../../utils/unique-code";
 
 export default factories.createCoreController(
   "api::guest.guest",
@@ -53,28 +54,15 @@ export default factories.createCoreController(
 
       const fullName: string = ctx.request.body.data?.full_name ?? "";
       const eventDocumentId: string = ctx.request.body.data?.event;
-      const initials = fullName
-        .split(" ")
-        .map((n) => n.charAt(0).toUpperCase())
-        .join("")
-        .slice(0, 3);
-
-      let unique_code: string;
-      let attempts = 0;
-      do {
-        const randomPart = Array.from({ length: 3 }, () =>
-          Math.floor(Math.random() * 10),
-        ).join("");
-        unique_code = `${initials}${randomPart}`;
+      const unique_code = await generateUniqueCode(fullName, async (code) => {
         const existing = await strapi.documents("api::guest.guest").findMany({
           filters: {
-            unique_code: { $eq: unique_code },
+            unique_code: { $eq: code },
             event: { documentId: { $eq: eventDocumentId } },
           },
         });
-        if (existing.length === 0) break;
-        attempts++;
-      } while (attempts < 10);
+        return existing.length > 0;
+      });
 
       ctx.request.body.data = { ...ctx.request.body.data, unique_code };
 
@@ -85,7 +73,11 @@ export default factories.createCoreController(
       const userEvents = ctx.state.events;
 
       const entity = await strapi.documents("api::guest.guest").findOne({
-        populate: ["event", "table"],
+        populate: {
+          event: true,
+          companions: { fields: ["documentId"] },
+          table: { populate: ["captain_guest", "captain_companion"] },
+        },
         documentId: ctx.params.id,
       });
 
@@ -101,7 +93,21 @@ export default factories.createCoreController(
         return ctx.forbidden("Access denied");
       }
 
-      if (entity.table) {
+      // Si el invitado deja su mesa y él o un acompañante suyo era el capitán,
+      // la mesa se queda sin capitán
+      const newTable = ctx.request.body.data?.table;
+      const leavesTable =
+        entity.table &&
+        newTable !== undefined &&
+        newTable !== entity.table.documentId;
+      const groupIds = [
+        entity.documentId,
+        ...(entity.companions ?? []).map((c) => c.documentId),
+      ];
+      const isCaptain =
+        groupIds.includes(entity.table?.captain_guest?.documentId) ||
+        groupIds.includes(entity.table?.captain_companion?.documentId);
+      if (leavesTable && isCaptain) {
         await strapi.documents("api::table.table").update({
           documentId: entity.table.documentId,
           data: {
@@ -137,6 +143,19 @@ export default factories.createCoreController(
 
       if (!hasAccess) {
         return ctx.forbidden("Access denied");
+      }
+
+      // Los acompañantes no tienen sentido sin su invitado: se eliminan con él
+      const companions = await strapi
+        .documents("api::companion.companion")
+        .findMany({
+          filters: { guest: { documentId: { $eq: entity.documentId } } },
+          fields: ["documentId"],
+        });
+      for (const c of companions) {
+        await strapi
+          .documents("api::companion.companion")
+          .delete({ documentId: c.documentId });
       }
 
       return await super.delete(ctx);

@@ -574,6 +574,7 @@ export interface ApiCompanionCompanion extends Struct.CollectionTypeSchema {
     full_name: Schema.Attribute.String & Schema.Attribute.Required;
     guest: Schema.Attribute.Relation<'manyToOne', 'api::guest.guest'>;
     invited_by: Schema.Attribute.Enumeration<['novio', 'novia']>;
+    is_minor: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -584,6 +585,7 @@ export interface ApiCompanionCompanion extends Struct.CollectionTypeSchema {
     phone: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     self_payed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    unique_code: Schema.Attribute.String & Schema.Attribute.Unique;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -735,6 +737,7 @@ export interface ApiGuestGuest extends Struct.CollectionTypeSchema {
     event: Schema.Attribute.Relation<'manyToOne', 'api::event.event'>;
     full_name: Schema.Attribute.String & Schema.Attribute.Required;
     invited_by: Schema.Attribute.Enumeration<['novio', 'novia']>;
+    is_minor: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::guest.guest'> &
       Schema.Attribute.Private;
